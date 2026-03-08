@@ -8,7 +8,7 @@ import org.koin.dsl.module
 
 val presentationModule = module {
     single { MovieListStateHandler() }
-    single { MovieDetailsStateHandler() }
+    factory { MovieDetailsStateHandler() }
     single { MovieListInteractor(get(), get()) }
-    single { MovieDetailInteractor(get(), get()) }
+    factory { MovieDetailInteractor(get(), get()) }
 }

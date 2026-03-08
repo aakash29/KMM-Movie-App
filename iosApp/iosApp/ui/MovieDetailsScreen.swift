@@ -47,9 +47,9 @@ struct MovieDetailsScreen: View {
                 ProgressView("Loading...")
             } else if let movieDetails = viewModel.movieDetailsUiState.movieDetails {
                 ScrollView {
+                    
                     VStack(alignment: .leading, spacing: 16) {
                         
-                        // Banner Image
                         AsyncImage(url: URL(string: movieDetails.image)) { image in
                             image
                                 .resizable()
@@ -62,21 +62,17 @@ struct MovieDetailsScreen: View {
                         
                         VStack(alignment: .leading, spacing: 12) {
                             
-                            // Title
                             Text(movieDetails.title)
                                 .font(.title)
                                 .fontWeight(.bold)
                             
-                            // Tagline
                             Text(movieDetails.tagLine)
                                 .italic()
                                 .foregroundColor(.gray)
                             
-                            // Overview
                             Text(movieDetails.description_)
                                 .font(.body)
                             
-                            // Director / Writer
                             HStack {
                                 
                                 VStack(alignment: .leading) {
@@ -94,9 +90,7 @@ struct MovieDetailsScreen: View {
                                 }
                             }
                             
-                            // Cast
                             Text("Cast:").font(.headline)
-                            
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: 16) {
                                     ForEach(movieDetails.cast, id: \.self) { cast in
@@ -105,7 +99,6 @@ struct MovieDetailsScreen: View {
                                 }
                             }
                             
-                            // Rating + Status
                             HStack {
                                 
                                 InfoRowView(
@@ -121,7 +114,6 @@ struct MovieDetailsScreen: View {
                                 )
                             }
                             
-                            // Revenue + Budget
                             HStack {
                                 
                                 InfoRowView(
@@ -141,8 +133,7 @@ struct MovieDetailsScreen: View {
                     }
                 }
             } else if let error = viewModel.movieDetailsUiState.error {
-                Text(error)
-                    .foregroundColor(.red)
+                Text(error).foregroundColor(.red)
             }
         }
         .navigationTitle(movie.title)
