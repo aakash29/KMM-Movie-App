@@ -9,11 +9,17 @@ data class MovieDetails(
     val image: String,
     val director: String,
     val writer: String,
-    val cast: String,
+    val cast: List<Cast>,
     val genres: String,
     val budget: Int,
     val revenue: Int,
     val releaseDate: String,
     val status: String,
     val runtime: Int
+)
+
+data class Cast(
+    val character: String,
+    val name: String,
+    val profilePath: String
 )

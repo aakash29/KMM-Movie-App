@@ -1,7 +1,9 @@
 package com.example.moviesapp.domain.usecase
 
 import com.example.moviesapp.core.IMAGE_BASE_URL
+import com.example.moviesapp.core.IMAGE_BASE_WIDTH_200_URL
 import com.example.moviesapp.core.Result
+import com.example.moviesapp.domain.model.Cast
 import com.example.moviesapp.domain.model.MovieDetails
 import com.example.moviesapp.domain.repository.CreditsDetailRepository
 import com.example.moviesapp.domain.repository.MovieDetailRepository
@@ -37,8 +39,13 @@ class GetMovieDetailUseCase(
                         image = IMAGE_BASE_URL + movieDetails.backdropPath.orEmpty(),
                         director = creditDetails.crew?.find { it?.job == "Director" }?.job.orEmpty(),
                         writer = creditDetails.crew?.find { it?.job == "Writer" }?.job.orEmpty(),
-                        cast = creditDetails.cast?.joinToString(", ") { it?.name.orEmpty() }
-                            .orEmpty(),
+                        cast = creditDetails.cast?.map {
+                            Cast(
+                                character = it?.character.orEmpty(),
+                                name = it?.name.orEmpty(),
+                                profilePath = IMAGE_BASE_WIDTH_200_URL + it?.profilePath.orEmpty()
+                            )
+                        } ?: emptyList(),
                         genres = movieDetails.genres?.joinToString(", ") { it?.name.orEmpty() }
                             .orEmpty(),
                         budget = movieDetails.budget ?: 0,

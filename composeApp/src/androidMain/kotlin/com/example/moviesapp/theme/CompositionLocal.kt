@@ -7,3 +7,5 @@ val LocalRadiusProvider = staticCompositionLocalOf { Radius() }
 val LocalTypographyProvider = staticCompositionLocalOf { MovieTypography() }
 
 val LocalSpacingProvider = staticCompositionLocalOf { Spacing() }
+
+val LocalColorProvider = staticCompositionLocalOf { ColorPalette() }

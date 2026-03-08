@@ -2,9 +2,16 @@
 
 package com.example.moviesapp.screen
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -15,11 +22,13 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -27,22 +36,23 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import coil3.compose.AsyncImage
 import com.example.moviesapp.R
+import com.example.moviesapp.components.CastItem
 import com.example.moviesapp.components.LoaderIndicator
+import com.example.moviesapp.domain.model.Cast
 import com.example.moviesapp.domain.model.MovieDetails
 import com.example.moviesapp.presentation.events.MovieDetailsEvent
 import com.example.moviesapp.presentation.state.MovieDetailsUiState
 import com.example.moviesapp.presentation.viewmodel.MovieDetailsViewModel
-import com.example.moviesapp.theme.LocalRadiusProvider
+import com.example.moviesapp.theme.LocalColorProvider
 import com.example.moviesapp.theme.LocalSpacingProvider
 import com.example.moviesapp.theme.LocalTypographyProvider
 import com.example.moviesapp.theme.MovieAppTheme
-import com.example.moviesapp.theme.bg_strong_color
-import com.example.moviesapp.theme.white
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun MovieDetailsScreen(
     movieId: Int,
+    movieName: String,
     onNavigationBack: () -> Unit,
     viewModel: MovieDetailsViewModel = koinViewModel()
 ) {
@@ -54,6 +64,7 @@ fun MovieDetailsScreen(
     }
     MovieDetails(
         uiState = uiState,
+        movieName = movieName,
         onNavigationBack = onNavigationBack
     )
 }
@@ -61,33 +72,34 @@ fun MovieDetailsScreen(
 @Composable
 private fun MovieDetails(
     uiState: MovieDetailsUiState,
+    movieName: String,
     onNavigationBack: () -> Unit,
 ) {
 
     val spacingProvider = LocalSpacingProvider.current
     val typographyProvider = LocalTypographyProvider.current
-    val radiusProvider = LocalRadiusProvider.current
+    val colorProvider = LocalColorProvider.current
 
     Scaffold(
         modifier = Modifier.fillMaxWidth(),
-        containerColor = white,
+        containerColor = colorProvider.backgroundColor.bg_white,
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        text = "Movies Details",
+                        text = movieName,
                         style = typographyProvider.titleMedium,
-                        color = white
+                        color = colorProvider.textColor.text_white
                     )
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = bg_strong_color
+                    containerColor = colorProvider.backgroundColor.bg_strong
                 ),
                 navigationIcon = {
                     IconButton(onClick = onNavigationBack) {
                         Icon(
                             imageVector = ImageVector.vectorResource(R.drawable.ic_back),
-                            tint = white,
+                            tint = colorProvider.backgroundColor.bg_white,
                             contentDescription = ""
                         )
                     }
@@ -98,60 +110,255 @@ private fun MovieDetails(
         when {
             uiState.isLoading -> {
                 LoaderIndicator(
-                    color = bg_strong_color
+                    color = colorProvider.backgroundColor.bg_strong
                 )
             }
 
             else -> {
-                ConstraintLayout(
-                    modifier = Modifier
-                        .padding(padding)
-                        .fillMaxWidth()
+                Column(modifier = Modifier
+                    .verticalScroll(rememberScrollState())
+                    .padding(padding)
+                    .fillMaxWidth()
                 ) {
 
-                    val (img, title, description) = createRefs()
+                    ConstraintLayout(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
 
-                    AsyncImage(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(250.dp)
-                            .constrainAs(img) {
-                                top.linkTo(parent.top)
+                        val (img, title, tagline, description, director, txtDirector, writer, txtWriter, txtCast, cast, txtRate, rate, txtStatus, status) = createRefs()
+                        val (txtRevenue, revenue, txtBudget, budget) = createRefs()
+                        val guideline = createGuidelineFromStart(0.5f)
+
+                        AsyncImage(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(250.dp)
+                                .constrainAs(img) {
+                                    top.linkTo(parent.top)
+                                    start.linkTo(parent.start)
+                                    end.linkTo(parent.end)
+                                },
+                            model = uiState.movieDetails?.image,
+                            contentDescription = uiState.movieDetails?.title,
+                            contentScale = ContentScale.Crop,
+                            error = painterResource(R.drawable.ic_placeholder)
+                        )
+
+                        Text(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .constrainAs(title) {
+                                    top.linkTo(img.bottom, margin = spacingProvider.spacing_2)
+                                    start.linkTo(parent.start, margin = spacingProvider.spacing_2)
+                                    end.linkTo(parent.end, margin = spacingProvider.spacing_2)
+                                    width = Dimension.fillToConstraints
+                                },
+                            text = uiState.movieDetails?.title.orEmpty(),
+                            style = typographyProvider.titleLarge,
+                        )
+
+                        Text(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .constrainAs(tagline) {
+                                    top.linkTo(title.bottom, margin = spacingProvider.spacing_2)
+                                    start.linkTo(parent.start, margin = spacingProvider.spacing_2)
+                                    end.linkTo(parent.end, margin = spacingProvider.spacing_2)
+                                    width = Dimension.fillToConstraints
+                                },
+                            text = uiState.movieDetails?.tagLine.orEmpty(),
+                            style = typographyProvider.headLine.copy(fontStyle = FontStyle.Italic),
+                            color = colorProvider.textColor.text_medium
+                        )
+
+                        Text(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .constrainAs(description) {
+                                    top.linkTo(tagline.bottom, margin = spacingProvider.spacing_2)
+                                    start.linkTo(parent.start, margin = spacingProvider.spacing_2)
+                                    end.linkTo(parent.end, margin = spacingProvider.spacing_2)
+                                    width = Dimension.fillToConstraints
+                                },
+                            text = uiState.movieDetails?.description.orEmpty(),
+                            style = typographyProvider.bodyMedium,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+
+                        Text(
+                            modifier = Modifier.constrainAs(director) {
+                                top.linkTo(description.bottom, margin = spacingProvider.spacing_4)
+                                start.linkTo(parent.start, margin = spacingProvider.spacing_2)
+                                end.linkTo(guideline, margin = spacingProvider.spacing_2)
+                                width = Dimension.fillToConstraints
+                            },
+                            text = uiState.movieDetails?.director.orEmpty(),
+                            style = typographyProvider.subHeadLine,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+
+                        Text(
+                            modifier = Modifier.constrainAs(txtDirector) {
+                                top.linkTo(director.bottom, margin = spacingProvider.spacing_1)
+                                start.linkTo(parent.start, margin = spacingProvider.spacing_2)
+                                end.linkTo(guideline, margin = spacingProvider.spacing_2)
+                                width = Dimension.fillToConstraints
+                            },
+                            text = "Director",
+                            style = typographyProvider.label,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+
+                        Text(
+                            modifier = Modifier.constrainAs(writer) {
+                                top.linkTo(description.bottom, margin = spacingProvider.spacing_4)
+                                start.linkTo(guideline)
+                                end.linkTo(parent.end, margin = spacingProvider.spacing_2)
+                                width = Dimension.fillToConstraints
+                            },
+                            text = uiState.movieDetails?.writer.orEmpty(),
+                            style = typographyProvider.subHeadLine,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+
+                        Text(
+                            modifier = Modifier.constrainAs(txtWriter) {
+                                top.linkTo(writer.bottom, margin = spacingProvider.spacing_1)
+                                start.linkTo(guideline)
+                                end.linkTo(parent.end, margin = spacingProvider.spacing_2)
+                                width = Dimension.fillToConstraints
+                            },
+                            text = "Writer",
+                            style = typographyProvider.label,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+
+                        Text(
+                            modifier = Modifier.constrainAs(txtCast) {
+                                top.linkTo(txtDirector.bottom, margin = spacingProvider.spacing_4)
+                                start.linkTo(parent.start, margin = spacingProvider.spacing_2)
+                                end.linkTo(parent.end, margin = spacingProvider.spacing_2)
+                                width = Dimension.fillToConstraints
+                            },
+                            text = "Cast: ",
+                            style = typographyProvider.subHeadLine,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+
+                        LazyRow(
+                            modifier = Modifier.constrainAs(cast) {
+                                top.linkTo(txtCast.bottom, margin = spacingProvider.spacing_1)
                                 start.linkTo(parent.start)
                                 end.linkTo(parent.end)
+                                width = Dimension.fillToConstraints
                             },
-                        model = uiState.movieDetails?.image,
-                        contentDescription = uiState.movieDetails?.title,
-                        contentScale = ContentScale.Crop,
-                        error = painterResource(R.drawable.ic_placeholder)
-                    )
+                            contentPadding = PaddingValues(all = spacingProvider.spacing_2),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(space = spacingProvider.spacing_4)
+                        ) {
+                            items(
+                                items = uiState.movieDetails?.cast ?: emptyList()
+                            ) { cast ->
+                                CastItem(cast = cast)
+                            }
+                        }
 
-                    Text(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .constrainAs(title) {
-                                top.linkTo(img.bottom, margin = spacingProvider.spacing_2)
+                        Text(
+                            modifier = Modifier.constrainAs(rate) {
+                                top.linkTo(cast.bottom, margin = spacingProvider.spacing_4)
                                 start.linkTo(parent.start, margin = spacingProvider.spacing_2)
+                                end.linkTo(guideline, margin = spacingProvider.spacing_2)
+                                width = Dimension.fillToConstraints
+                            },
+                            text = "${uiState.movieDetails?.voteAverage} / 10",
+                            style = typographyProvider.subHeadLine,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+
+                        Text(
+                            modifier = Modifier.constrainAs(txtRate) {
+                                top.linkTo(rate.bottom, margin = spacingProvider.spacing_1)
+                                start.linkTo(parent.start, margin = spacingProvider.spacing_2)
+                                end.linkTo(guideline, margin = spacingProvider.spacing_2)
+                                width = Dimension.fillToConstraints
+                            },
+                            text = "Rate",
+                            style = typographyProvider.label,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+
+                        Text(
+                            modifier = Modifier.constrainAs(status) {
+                                top.linkTo(cast.bottom, margin = spacingProvider.spacing_4)
+                                start.linkTo(guideline)
                                 end.linkTo(parent.end, margin = spacingProvider.spacing_2)
                                 width = Dimension.fillToConstraints
                             },
-                        text = uiState.movieDetails?.title.orEmpty(),
-                        style = typographyProvider.titleLarge,
-                    )
+                            text = uiState.movieDetails?.status.orEmpty(),
+                            style = typographyProvider.subHeadLine,
+                            overflow = TextOverflow.Ellipsis,
+                        )
 
-                    Text(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .constrainAs(description) {
-                                top.linkTo(title.bottom, margin = spacingProvider.spacing_2)
-                                start.linkTo(parent.start, margin = spacingProvider.spacing_2)
+                        Text(
+                            modifier = Modifier.constrainAs(txtStatus) {
+                                top.linkTo(status.bottom, margin = spacingProvider.spacing_1)
+                                start.linkTo(guideline)
                                 end.linkTo(parent.end, margin = spacingProvider.spacing_2)
                                 width = Dimension.fillToConstraints
                             },
-                        text = uiState.movieDetails?.description.orEmpty(),
-                        style = typographyProvider.bodyMedium,
-                        overflow = TextOverflow.Ellipsis,
-                    )
+                            text = "Status",
+                            style = typographyProvider.label,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+
+                        Text(
+                            modifier = Modifier.constrainAs(revenue) {
+                                top.linkTo(txtRate.bottom, margin = spacingProvider.spacing_4)
+                                start.linkTo(parent.start, margin = spacingProvider.spacing_2)
+                                end.linkTo(guideline, margin = spacingProvider.spacing_2)
+                                width = Dimension.fillToConstraints
+                            },
+                            text = "${uiState.movieDetails?.revenue}",
+                            style = typographyProvider.subHeadLine,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+
+                        Text(
+                            modifier = Modifier.constrainAs(txtRevenue) {
+                                top.linkTo(revenue.bottom, margin = spacingProvider.spacing_1)
+                                start.linkTo(parent.start, margin = spacingProvider.spacing_2)
+                                end.linkTo(guideline, margin = spacingProvider.spacing_2)
+                                width = Dimension.fillToConstraints
+                            },
+                            text = "Revenue",
+                            style = typographyProvider.label,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+
+                        Text(
+                            modifier = Modifier.constrainAs(budget) {
+                                top.linkTo(txtStatus.bottom, margin = spacingProvider.spacing_4)
+                                start.linkTo(guideline)
+                                end.linkTo(parent.end, margin = spacingProvider.spacing_2)
+                                width = Dimension.fillToConstraints
+                            },
+                            text = "${uiState.movieDetails?.budget}",
+                            style = typographyProvider.subHeadLine,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+
+                        Text(
+                            modifier = Modifier.constrainAs(txtBudget) {
+                                top.linkTo(budget.bottom, margin = spacingProvider.spacing_1)
+                                start.linkTo(guideline)
+                                end.linkTo(parent.end, margin = spacingProvider.spacing_2)
+                                width = Dimension.fillToConstraints
+                            },
+                            text = "Budget",
+                            style = typographyProvider.label,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
                 }
             }
         }
@@ -169,9 +376,20 @@ private fun PreviewMovieDetailScreen() {
                     title = "Shelter",
                     description = "A man living in self-imposed exile on a remote island rescues a young girl from a violent storm, setting off a chain of events that forces him out of retirement to protect her from enemies tied to his past.",
                     image = "",
-                    director = "John Doe",
-                    writer = "Jane Smith",
-                    cast = "Actor 1, Actor 2",
+                    director = "Ric Roman Waugh",
+                    writer = "Ward Parry",
+                    cast = listOf(
+                        Cast(
+                            name = "Jason Statham",
+                            profilePath = "/pXGSq2UpcDE2NMF8LR56QZf5U1q.jpg",
+                            character = "Mason"
+                        ),
+                        Cast(
+                            name = "Michael Shaeffer",
+                            profilePath = "/pXGSq2UpcDE2NMF8LR56QZf5U1q.jpg",
+                            character = "Uncle"
+                        )
+                    ),
                     genres = "Action, Drama",
                     budget = 1000000,
                     revenue = 2000000,
@@ -179,9 +397,10 @@ private fun PreviewMovieDetailScreen() {
                     status = "Released",
                     runtime = 102,
                     voteAverage = 7.5,
-                    tagLine = "A Tagline",
+                    tagLine = "Her safety. His mission.",
                 )
             ),
+            movieName = "Shelter",
             onNavigationBack = { }
         )
     }

@@ -10,7 +10,8 @@ fun MovieAppTheme(
     CompositionLocalProvider(
         LocalRadiusProvider provides Radius(),
         LocalTypographyProvider provides MovieTypography(),
-        LocalSpacingProvider provides Spacing()
+        LocalSpacingProvider provides Spacing(),
+        LocalColorProvider provides ColorPalette()
     ) {
         content()
     }

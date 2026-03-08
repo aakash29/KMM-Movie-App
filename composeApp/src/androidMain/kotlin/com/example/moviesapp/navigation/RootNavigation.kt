@@ -44,14 +44,15 @@ fun RootNavigation() {
         entryProvider = entryProvider {
             entry<AppNavKey.MovieList> {
                 MovieListScreen(
-                    onNavigateToDetails = { movieId ->
-                        backStack.add(AppNavKey.MovieDetails(movieId))
+                    onNavigateToDetails = { movieId, movieName ->
+                        backStack.add(AppNavKey.MovieDetails(movieId, movieName))
                     }
                 )
             }
             entry<AppNavKey.MovieDetails> {  key ->
                 MovieDetailsScreen(
                     movieId = key.movieId,
+                    movieName = key.movieName,
                     onNavigationBack = { backStack.removeLastOrNull()}
                 )
             }

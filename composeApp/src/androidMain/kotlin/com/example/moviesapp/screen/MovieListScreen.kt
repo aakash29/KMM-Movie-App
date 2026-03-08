@@ -37,18 +37,17 @@ import com.example.moviesapp.components.LoaderIndicator
 import com.example.moviesapp.domain.model.Movie
 import com.example.moviesapp.presentation.state.MovieUiState
 import com.example.moviesapp.presentation.viewmodel.MovieListViewModel
+import com.example.moviesapp.theme.LocalColorProvider
 import com.example.moviesapp.theme.LocalRadiusProvider
 import com.example.moviesapp.theme.LocalSpacingProvider
 import com.example.moviesapp.theme.LocalTypographyProvider
 import com.example.moviesapp.theme.MovieAppTheme
-import com.example.moviesapp.theme.bg_strong_color
-import com.example.moviesapp.theme.white
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun MovieListScreen(
     viewModel: MovieListViewModel = koinViewModel(),
-    onNavigateToDetails: (movieId: Int) -> Unit,
+    onNavigateToDetails: (movieId: Int, movieName: String) -> Unit,
 ) {
     val uiState = viewModel.uiState.collectAsState().value
     MovieList(uiState = uiState, onNavigateToDetails = onNavigateToDetails)
@@ -57,25 +56,26 @@ fun MovieListScreen(
 @Composable
 private fun MovieList(
     uiState: MovieUiState,
-    onNavigateToDetails: (movieId: Int) -> Unit,
+    onNavigateToDetails: (movieId: Int, movieName: String) -> Unit,
 ) {
     val spacingProvider = LocalSpacingProvider.current
     val typographyProvider = LocalTypographyProvider.current
+    val colorProvider = LocalColorProvider.current
 
     Scaffold(
         modifier = Modifier.fillMaxWidth(),
-        containerColor = white,
+        containerColor = colorProvider.backgroundColor.bg_white,
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
                     Text(
                         text = "Movies",
                         style = typographyProvider.titleMedium,
-                        color = white
+                        color = colorProvider.textColor.text_white
                     )
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = bg_strong_color
+                    containerColor = colorProvider.backgroundColor.bg_strong
                 )
             )
         }
@@ -84,9 +84,10 @@ private fun MovieList(
         when {
             uiState.isLoading -> {
                 LoaderIndicator(
-                    color = bg_strong_color
+                    color = colorProvider.backgroundColor.bg_strong
                 )
             }
+
             else -> {
                 LazyColumn(
                     modifier = Modifier
@@ -112,19 +113,22 @@ private fun MovieList(
 fun MovieItem(
     modifier: Modifier = Modifier,
     movie: Movie,
-    onNavigateToDetails: (movieId: Int) -> Unit,
+    onNavigateToDetails: (movieId: Int, movieName: String) -> Unit,
 ) {
 
     val spacingProvider = LocalSpacingProvider.current
     val typographyProvider = LocalTypographyProvider.current
     val radiusProvider = LocalRadiusProvider.current
+    val colorProvider = LocalColorProvider.current
 
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .clickable { onNavigateToDetails(movie.id) },
+            .clickable {
+                onNavigateToDetails(movie.id, movie.title)
+            },
         shape = RoundedCornerShape(radiusProvider.large),
-        colors = CardDefaults.cardColors(containerColor = white),
+        colors = CardDefaults.cardColors(containerColor = colorProvider.backgroundColor.bg_white),
         elevation = CardDefaults.cardElevation(defaultElevation = spacingProvider.spacing_4)
     ) {
         ConstraintLayout(modifier = Modifier.fillMaxWidth()) {
@@ -203,7 +207,7 @@ fun MovieListScreenPreview() {
                     )
                 )
             ),
-            onNavigateToDetails = { }
+            onNavigateToDetails = { _, _ -> }
         )
     }
 }

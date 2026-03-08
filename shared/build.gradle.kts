@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.kotlinx.serialization)
+    alias(libs.plugins.skie)
 }
 
 kotlin {
@@ -33,6 +34,7 @@ kotlin {
             implementation(libs.koin.core)
             implementation(libs.koin.compose)
             implementation(libs.koin.compose.viewmodel)
+            implementation(libs.skie.annotations)
         }
         androidMain.dependencies {
             implementation(libs.ktor.client.android)
@@ -56,5 +58,16 @@ android {
     }
     defaultConfig {
         minSdk = libs.versions.android.minSdk.get().toInt()
+    }
+}
+
+skie {
+    features {
+        // https://skie.touchlab.co/features/flows-in-swiftui
+        enableSwiftUIObservingPreview = true
+    }
+
+    analytics {
+        enabled.set(false)
     }
 }
