@@ -5,7 +5,7 @@ import com.example.moviesapp.core.di.appModule
 import com.example.moviesapp.data.di.dataModule
 import com.example.moviesapp.di.viewModelsModule
 import com.example.moviesapp.domain.di.domainModule
-import com.example.moviesapp.presentation.di.interactorModule
+import com.example.moviesapp.presentation.di.presentationModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.GlobalContext.startKoin
@@ -21,7 +21,7 @@ class MoviesApplication : Application() {
                 appModule,
                 dataModule,
                 domainModule,
-                interactorModule,
+                presentationModule,
                 viewModelsModule
             )
         }

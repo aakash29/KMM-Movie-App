@@ -4,7 +4,9 @@ import com.example.moviesapp.core.AUTHORIZATION_BEARER_TOKEN
 import com.example.moviesapp.core.BASE_URL
 import com.example.moviesapp.core.Result
 import com.example.moviesapp.data.MOVIE_LIST_PATH
+import com.example.moviesapp.data.mapper.toDomain
 import com.example.moviesapp.data.model.MoviesResponse
+import com.example.moviesapp.domain.model.Movie
 import com.example.moviesapp.domain.repository.MovieListRepository
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -15,19 +17,29 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
 import io.ktor.http.encodedPath
+import io.ktor.http.isSuccess
 import io.ktor.http.takeFrom
 
 class MovieListRepositoryImpl(
     private val httpClient: HttpClient
 ) : MovieListRepository {
 
-    override suspend fun getMovieList(): Result<List<MoviesResponse>> {
-        return httpClient.get {
-            headers {
-                endPoint(MOVIE_LIST_PATH)
+    override suspend fun getMovieList(): Result<List<Movie>?> {
+        return try {
+            val response = httpClient.get {
+                headers {
+                    endPoint(MOVIE_LIST_PATH)
+                }
+                contentType(ContentType.Application.Json)
             }
-            contentType(ContentType.Application.Json)
-        }.body()
+            if (response.status.isSuccess()) {
+                Result.Success(response.body<MoviesResponse>().toDomain())
+            } else {
+                Result.Error(Exception("Error: ${response.status.value}"))
+            }
+        } catch (e: Exception) {
+            Result.Error(e)
+        }
     }
 
     private fun HttpRequestBuilder.endPoint(path: String) {

@@ -6,7 +6,7 @@ import com.example.moviesapp.presentation.state.MovieDetailsStateHandler
 import com.example.moviesapp.presentation.state.MovieListStateHandler
 import org.koin.dsl.module
 
-val interactorModule = module {
+val presentationModule = module {
     single { MovieListStateHandler() }
     single { MovieDetailsStateHandler() }
     single { MovieListInteractor(get(), get()) }

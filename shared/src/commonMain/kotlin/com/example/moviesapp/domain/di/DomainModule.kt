@@ -6,5 +6,5 @@ import org.koin.dsl.module
 
 val domainModule = module {
     single { GetMovieListUseCase(get()) }
-    single { GetMovieDetailUseCase(get()) }
+    single { GetMovieDetailUseCase(get(), get()) }
 }

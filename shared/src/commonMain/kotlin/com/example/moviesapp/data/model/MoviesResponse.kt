@@ -1,19 +1,18 @@
 package com.example.moviesapp.data.model
 
-
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class MoviesResponse(
     @SerialName("page")
-    val page: Int?,
+    val page: Int? = null,
     @SerialName("results")
-    val movies: List<Movie?>?,
+    val movies: List<Movie>? = null,
     @SerialName("total_pages")
-    val totalPages: Int?,
+    val totalPages: Int? = null,
     @SerialName("total_results")
-    val totalResults: Int?
+    val totalResults: Int? = null
 )
 
 @Serializable

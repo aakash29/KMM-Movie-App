@@ -3,7 +3,9 @@ package com.example.moviesapp.presentation.viewmodel
 import androidx.lifecycle.viewModelScope
 import com.example.moviesapp.core.BaseViewModel
 import com.example.moviesapp.presentation.events.MovieDetailsEvent
+import com.example.moviesapp.presentation.events.MovieListEvent
 import com.example.moviesapp.presentation.interactor.MovieDetailInteractor
+import com.example.moviesapp.presentation.state.MovieDetailsUiState
 import com.example.moviesapp.presentation.state.MovieUiState
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
@@ -16,7 +18,7 @@ class MovieDetailsViewModel(
     val uiState = interactor.subscribeToUiState().stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
-        initialValue = MovieUiState()
+        initialValue = MovieDetailsUiState()
     )
 
     override fun handleEvent(event: MovieDetailsEvent) {

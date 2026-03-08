@@ -26,11 +26,11 @@ class MovieListInteractor(
         }
 
         getMovieListUseCase()
-            .onSuccess {
+            .onSuccess { result ->
                 stateHandler.updateUiState {
                     copy(
                         isLoading = false,
-                        movies = emptyList(),
+                        movies = result ?: emptyList(),
                     )
                 }
             }.onError { error ->

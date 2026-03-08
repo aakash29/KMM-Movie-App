@@ -2,7 +2,6 @@ package com.example.moviesapp.presentation.interactor
 
 import com.example.moviesapp.core.onError
 import com.example.moviesapp.core.onSuccess
-import com.example.moviesapp.domain.model.MovieDetails
 import com.example.moviesapp.domain.usecase.GetMovieDetailUseCase
 import com.example.moviesapp.presentation.events.MovieDetailsEvent
 import com.example.moviesapp.presentation.state.MovieDetailsStateHandler
@@ -26,14 +25,18 @@ class MovieDetailInteractor(
             copy(isLoading = true)
         }
 
-        getMovieDetailUseCase(movieId = movieId).onSuccess {
-            stateHandler.updateUiState {
-                copy(isLoading = false, movieDetails = MovieDetails(1, "Test Movie"))
+        getMovieDetailUseCase(movieId = movieId)
+            .onSuccess { response ->
+                stateHandler.updateUiState {
+                    copy(
+                        isLoading = false,
+                        movieDetails = response
+                    )
+                }
+            }.onError { error ->
+                stateHandler.updateUiState {
+                    copy(isLoading = false, error = error.message)
+                }
             }
-        }.onError { error ->
-            stateHandler.updateUiState {
-                copy(isLoading = false, error = error.message)
-            }
-        }
     }
 }

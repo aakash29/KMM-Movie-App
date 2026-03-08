@@ -19,6 +19,10 @@ class MovieListViewModel(
         initialValue = MovieUiState()
     )
 
+    init {
+        handleEvent(MovieListEvent.LoadMovies)
+    }
+
     override fun handleEvent(event: MovieListEvent) {
         viewModelScope.launch {
             when (event) {
