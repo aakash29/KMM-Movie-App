@@ -3,6 +3,7 @@ package com.example.moviesapp.theme
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
+@Suppress("PropertyName")
 data class Spacing(
     val spacing_0: Dp = 0.dp,
     val spacing_0_5: Dp = 2.dp,

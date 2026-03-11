@@ -1,3 +1,4 @@
+@file:Suppress("PropertyName")
 package com.example.moviesapp.theme
 
 import androidx.compose.ui.graphics.Color
@@ -15,7 +16,6 @@ data class TextColor(
     val text_error: Color = error_color,
     val text_success: Color = success_color
 )
-
 data class BackgroundColor(
     val bg_strong: Color = bg_strong_color,
     val bg_medium: Color = bg_medium_color,
