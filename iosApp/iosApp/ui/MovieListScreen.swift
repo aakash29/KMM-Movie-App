@@ -60,6 +60,7 @@ struct MovieListScreen: View {
                     }
                     .padding(.vertical)
                     .navigationTitle("Movies")
+                    .navigationBarTitleDisplayMode(.inline)
                     .navigationDestination(for: Movie_.self) { movie in
                         MovieDetailsScreen(movie: movie)
                     }
@@ -89,7 +90,7 @@ struct MovieItemView: View {
                 Text(movie.title)
                     .font(.headline)
                     .fontWeight(.bold)
-                Text(movie.description_)
+                Text(movie.overview)
                     .font(.subheadline)
                     .fontWeight(.regular)
                     .lineLimit(5)

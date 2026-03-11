@@ -1,9 +1,6 @@
 package com.example.moviesapp.domain.usecase
 
-import com.example.moviesapp.core.IMAGE_BASE_URL
-import com.example.moviesapp.core.IMAGE_BASE_WIDTH_200_URL
 import com.example.moviesapp.core.Result
-import com.example.moviesapp.domain.model.Cast
 import com.example.moviesapp.domain.model.MovieDetails
 import com.example.moviesapp.domain.repository.CreditsDetailRepository
 import com.example.moviesapp.domain.repository.MovieDetailRepository
@@ -19,40 +16,22 @@ class GetMovieDetailUseCase(
 
         return supervisorScope {
 
-            val movieDetailResult = async { repository.getMovieDetails(movieId) }
-            val creditDetailResult = async { creditRepository.getCreditsDetails(movieId) }
+            val movieDetailDeferred = async { repository.getMovieDetails(movieId) }
+            val creditDetailDeferred = async { creditRepository.getCredits(movieId) }
 
-            val movieDetail = movieDetailResult.await()
-            val creditDetail = creditDetailResult.await()
+            val movieDetailResult = movieDetailDeferred.await()
+            val creditDetailResult = creditDetailDeferred.await()
 
-            if (movieDetail is Result.Success && creditDetail is Result.Success) {
-                val movieDetails = movieDetail.data
-                val creditDetails = creditDetail.data
+            if (movieDetailResult is Result.Success && creditDetailResult is Result.Success) {
+                val movieDetails = movieDetailResult.data
+                val (cast, crew) = creditDetailResult.data
+                val (director, writer) = crew
 
                 Result.Success(
-                    MovieDetails(
-                        id = movieDetails.id ?: 0,
-                        title = movieDetails.title.orEmpty(),
-                        description = movieDetails.overview.orEmpty(),
-                        voteAverage = movieDetails.voteAverage ?: 0.0,
-                        tagLine = movieDetails.tagline.orEmpty(),
-                        image = IMAGE_BASE_URL + movieDetails.backdropPath.orEmpty(),
-                        director = creditDetails.crew?.find { it?.job == "Director" }?.job.orEmpty(),
-                        writer = creditDetails.crew?.find { it?.job == "Writer" }?.job.orEmpty(),
-                        cast = creditDetails.cast?.map {
-                            Cast(
-                                character = it?.character.orEmpty(),
-                                name = it?.name.orEmpty(),
-                                profilePath = IMAGE_BASE_WIDTH_200_URL + it?.profilePath.orEmpty()
-                            )
-                        } ?: emptyList(),
-                        genres = movieDetails.genres?.joinToString(", ") { it?.name.orEmpty() }
-                            .orEmpty(),
-                        budget = movieDetails.budget ?: 0,
-                        revenue = movieDetails.revenue ?: 0,
-                        releaseDate = movieDetails.releaseDate.orEmpty(),
-                        status = movieDetails.status.orEmpty(),
-                        runtime = movieDetails.runtime ?: 0
+                    movieDetails.copy(
+                        cast = cast,
+                        director = director,
+                        writer = writer
                     )
                 )
             } else {

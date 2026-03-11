@@ -173,7 +173,7 @@ fun MovieItem(
                         width = Dimension.fillToConstraints
                         height = Dimension.fillToConstraints
                     },
-                text = movie.description,
+                text = movie.overview,
                 style = typographyProvider.bodyMedium,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -193,7 +193,7 @@ fun MovieListScreenPreview() {
                         id = 12344,
                         title = "Shelter",
                         lang = "en",
-                        description = "A man living in self-imposed exile on a remote island rescues a young girl from a violent storm, setting off a chain of events that forces him out of seclusion to protect her from enemies tied to his past.",
+                        overview = "A man living in self-imposed exile on a remote island rescues a young girl from a violent storm, setting off a chain of events that forces him out of seclusion to protect her from enemies tied to his past.",
                         image = "",
                         releaseDate = "2026-01-28"
                     ),
@@ -201,7 +201,7 @@ fun MovieListScreenPreview() {
                         id = 12344,
                         title = "History of the World: Part I",
                         lang = "en",
-                        description = "An uproarious version of history that proves nothing is sacred – not even the Roman Empire, the French Revolution and the Spanish Inquisition.",
+                        overview = "An uproarious version of history that proves nothing is sacred – not even the Roman Empire, the French Revolution and the Spanish Inquisition.",
                         image = "",
                         releaseDate = "1981-06-12"
                     )

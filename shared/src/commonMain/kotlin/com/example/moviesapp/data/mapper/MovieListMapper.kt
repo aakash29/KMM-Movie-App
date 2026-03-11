@@ -10,7 +10,7 @@ fun MoviesResponse.toDomain(): List<Movie>? {
             id = movie.id ?: 0,
             title = movie.title.orEmpty(),
             lang = movie.originalLanguage.orEmpty(),
-            description = movie.overview.orEmpty(),
+            overview = movie.overview.orEmpty(),
             image = IMAGE_BASE_WIDTH_200_URL + movie.posterPath.orEmpty(),
             releaseDate = movie.releaseDate.orEmpty()
         )

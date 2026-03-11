@@ -4,7 +4,9 @@ import com.example.moviesapp.core.AUTHORIZATION_BEARER_TOKEN
 import com.example.moviesapp.core.BASE_URL
 import com.example.moviesapp.core.Result
 import com.example.moviesapp.data.MOVIE_DETAIL_PATH
+import com.example.moviesapp.data.mapper.toMovieDetailDomain
 import com.example.moviesapp.data.model.MovieDetailsResponse
+import com.example.moviesapp.domain.model.MovieDetails
 import com.example.moviesapp.domain.repository.MovieDetailRepository
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -20,7 +22,7 @@ import io.ktor.http.takeFrom
 
 class MovieDetailRepositoryImpl(private val httpClient: HttpClient) : MovieDetailRepository {
 
-    override suspend fun getMovieDetails(movieId: Int): Result<MovieDetailsResponse> {
+    override suspend fun getMovieDetails(movieId: Int): Result<MovieDetails> {
         return try {
             val response = httpClient.get {
                 headers {
@@ -29,7 +31,8 @@ class MovieDetailRepositoryImpl(private val httpClient: HttpClient) : MovieDetai
                 contentType(ContentType.Application.Json)
             }
             if (response.status.isSuccess()) {
-                Result.Success(response.body<MovieDetailsResponse>())
+                val movieDetailsResponse = response.body<MovieDetailsResponse>()
+                Result.Success(movieDetailsResponse.toMovieDetailDomain())
             } else {
                 Result.Error(Exception("Error: ${response.status.value}"))
             }

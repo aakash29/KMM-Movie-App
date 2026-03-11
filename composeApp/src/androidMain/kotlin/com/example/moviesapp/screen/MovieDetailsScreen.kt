@@ -180,7 +180,7 @@ private fun MovieDetails(
                                     end.linkTo(parent.end, margin = spacingProvider.spacing_2)
                                     width = Dimension.fillToConstraints
                                 },
-                            text = uiState.movieDetails?.description.orEmpty(),
+                            text = uiState.movieDetails?.overview.orEmpty(),
                             style = typographyProvider.bodyMedium,
                             overflow = TextOverflow.Ellipsis,
                         )
@@ -374,7 +374,7 @@ private fun PreviewMovieDetailScreen() {
                 movieDetails = MovieDetails(
                     id = 1234,
                     title = "Shelter",
-                    description = "A man living in self-imposed exile on a remote island rescues a young girl from a violent storm, setting off a chain of events that forces him out of retirement to protect her from enemies tied to his past.",
+                    overview = "A man living in self-imposed exile on a remote island rescues a young girl from a violent storm, setting off a chain of events that forces him out of retirement to protect her from enemies tied to his past.",
                     image = "",
                     director = "Ric Roman Waugh",
                     writer = "Ward Parry",

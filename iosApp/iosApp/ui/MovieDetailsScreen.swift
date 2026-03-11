@@ -70,7 +70,7 @@ struct MovieDetailsScreen: View {
                                 .italic()
                                 .foregroundColor(.gray)
                             
-                            Text(movieDetails.description_)
+                            Text(movieDetails.overview)
                                 .font(.body)
                             
                             HStack {
@@ -92,11 +92,11 @@ struct MovieDetailsScreen: View {
                             
                             Text("Cast:").font(.headline)
                             ScrollView(.horizontal, showsIndicators: false) {
-                                HStack(spacing: 16) {
+                                HStack() {
                                     ForEach(movieDetails.cast, id: \.self) { cast in
                                         CastCardView(cast: cast)
                                     }
-                                }
+                                }.padding(.vertical)
                             }
                             
                             HStack {
@@ -161,18 +161,21 @@ struct CastCardView: View {
             }
             .frame(width: 140, height: 150)
             .clipped()
-            .cornerRadius(10)
+            .cornerRadius(8, corners: [.topLeft, .topRight])
             
             Text(cast.name)
                 .font(.headline)
                 .lineLimit(1)
+                .padding(.horizontal, 4)
             
             Text(cast.character)
                 .font(.subheadline)
                 .foregroundColor(.gray)
+                .lineLimit(1)
+                .padding(.horizontal, 4)
+                .padding(.bottom, 4)
         }
         .frame(width: 140)
-        .padding(8)
         .background(Color.white)
         .cornerRadius(12)
         .shadow(radius: 3)
