@@ -49,7 +49,7 @@ struct MovieRow: View {
                 Text(movie.overview)
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
-                    .lineLimit(3)
+                    .lineLimit(5)
             }
             .padding(8)
         }

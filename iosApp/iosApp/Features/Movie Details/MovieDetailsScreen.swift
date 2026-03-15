@@ -124,7 +124,19 @@ struct MovieDetailsScreen: View {
                     }
                 }
             } else if let error = viewModel.movieDetailsUiState.error {
-                Text(error).foregroundColor(.red)
+                VStack(spacing: 12) {
+                    Text(error)
+                        .multilineTextAlignment(.center)
+                        .foregroundStyle(.secondary)
+                    Button(String(localized: "common.retry")) {
+                        viewModel.onEvent(MovieDetailsEvent.LoadMovieDetails(movieId: movie.id))
+                    }
+                    .buttonStyle(.borderedProminent)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 24)
+                
+                //Text(error).foregroundColor(.red)
             }
         }
         .navigationTitle(movie.title)
