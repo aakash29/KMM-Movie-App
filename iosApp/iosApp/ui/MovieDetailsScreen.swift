@@ -22,7 +22,8 @@ extension MovieDetailsScreen {
             self.movieDetailsUiState = movieDetailsViewModel.uiState.value
             
             Task {
-                for await state in movieDetailsViewModel.uiState {
+                let sequence = SkieSwiftFlow(movieDetailsViewModel.uiState)
+                for await state in sequence {
                     self.movieDetailsUiState = state
                 }
             }
@@ -99,34 +100,34 @@ struct MovieDetailsScreen: View {
                                 }.padding(.vertical)
                             }
                             
-                            HStack {
+                            HStack(alignment: .top, spacing: 0) {
                                 
                                 InfoRowView(
                                     title: "Rate",
-                                    value: "\(movieDetails.voteAverage) / 10"
+                                    value: String(format: "%.1f / 10",(movieDetails.voteAverage))
                                 )
-                                
-                                Spacer()
+                                .frame(maxWidth: .infinity, alignment: .leading)
                                 
                                 InfoRowView(
                                     title: "Status",
                                     value: movieDetails.status
                                 )
+                                .frame(maxWidth: .infinity, alignment: .leading)
                             }
                             
-                            HStack {
+                            HStack(alignment: .top, spacing: 0) {
                                 
                                 InfoRowView(
                                     title: "Revenue",
                                     value: "\(movieDetails.revenue)"
                                 )
-                                
-                                Spacer()
+                                .frame(maxWidth: .infinity, alignment: .leading)
                                 
                                 InfoRowView(
                                     title: "Budget",
                                     value: "\(movieDetails.budget)"
                                 )
+                                .frame(maxWidth: .infinity, alignment: .leading)
                             }
                         }
                         .padding()

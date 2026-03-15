@@ -19,10 +19,11 @@ extension MovieListScreen {
         init() {
             let koin = KoinKt.getKoinInstance()
             self.movieListViewModel = koin.getMovieListViewModel()
-            self.movieUiState = movieListViewModel.uiState.value
+            self.movieUiState = MovieUiState(isLoading: false, movies: [], error: nil, currentPage: 1, isEndReached: false)
             
             Task {
-                for await state in movieListViewModel.uiState {
+                let sequence = SkieSwiftFlow(movieListViewModel.uiState)
+                for await state in sequence {
                     self.movieUiState = state
                 }
             }
@@ -44,7 +45,7 @@ struct MovieListScreen: View {
         NavigationStack(path: $navigationPath) {
             
             ScrollView {
-                if viewModel.movieUiState.isLoading {
+                if viewModel.movieUiState.isLoading && viewModel.movieUiState.movies.isEmpty {
                     ProgressView()
                         .frame(maxWidth: .infinity)
                         .padding()
@@ -56,6 +57,22 @@ struct MovieListScreen: View {
                                 .onTapGesture {
                                     navigationPath.append(movie)
                                 }
+                                .onAppear {
+                                    if movie == viewModel.movieUiState.movies.last {
+                                        if !viewModel.movieUiState.isLoading && !viewModel.movieUiState.isEndReached {
+                                            viewModel.onEvent(MovieListEvent.LoadNextPage())
+                                        }
+                                    }
+                                }
+                        }
+                        
+                        if viewModel.movieUiState.isLoading {
+                            HStack {
+                                Spacer()
+                                ProgressView()
+                                Spacer()
+                            }
+                            .padding()
                         }
                     }
                     .padding(.vertical)
@@ -66,7 +83,9 @@ struct MovieListScreen: View {
                     }
                 }
             }.onAppear {
-                viewModel.onEvent(MovieListEvent.LoadMovies())
+                if viewModel.movieUiState.movies.isEmpty {
+                    viewModel.onEvent(MovieListEvent.LoadMovies())
+                }
             }
         }
     }

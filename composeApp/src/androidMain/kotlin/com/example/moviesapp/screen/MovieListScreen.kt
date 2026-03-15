@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -21,6 +21,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,6 +36,7 @@ import coil3.compose.AsyncImage
 import com.example.moviesapp.R
 import com.example.moviesapp.components.LoaderIndicator
 import com.example.moviesapp.domain.model.Movie
+import com.example.moviesapp.presentation.events.MovieListEvent
 import com.example.moviesapp.presentation.state.MovieUiState
 import com.example.moviesapp.presentation.viewmodel.MovieListViewModel
 import com.example.moviesapp.theme.LocalColorProvider
@@ -50,13 +52,18 @@ fun MovieListScreen(
     onNavigateToDetails: (movieId: Int, movieName: String) -> Unit,
 ) {
     val uiState = viewModel.uiState.collectAsState().value
-    MovieList(uiState = uiState, onNavigateToDetails = onNavigateToDetails)
+    MovieList(
+        uiState = uiState,
+        onNavigateToDetails = onNavigateToDetails,
+        onLoadNextPage = { viewModel.handleEvent(MovieListEvent.LoadNextPage) }
+    )
 }
 
 @Composable
 private fun MovieList(
     uiState: MovieUiState,
     onNavigateToDetails: (movieId: Int, movieName: String) -> Unit,
+    onLoadNextPage: () -> Unit = {}
 ) {
     val spacingProvider = LocalSpacingProvider.current
     val typographyProvider = LocalTypographyProvider.current
@@ -81,27 +88,37 @@ private fun MovieList(
         }
     ) { padding ->
 
-        when {
-            uiState.isLoading -> {
-                LoaderIndicator(
-                    color = colorProvider.backgroundColor.bg_strong
-                )
-            }
+        if (uiState.isLoading && uiState.movies.isEmpty()) {
+            LoaderIndicator(
+                color = colorProvider.backgroundColor.bg_strong
+            )
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .padding(padding)
+                    .fillMaxSize(),
+                contentPadding = PaddingValues(all = spacingProvider.spacing_4),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(space = spacingProvider.spacing_4)
+            ) {
+                itemsIndexed(
+                    items = uiState.movies,
+                    key = { _, movie -> "${movie.id}_${movie.title}" }
+                ) { index, movie ->
+                    if (index >= uiState.movies.size - 1 && !uiState.isLoading && !uiState.isEndReached) {
+                        LaunchedEffect(Unit) {
+                            onLoadNextPage()
+                        }
+                    }
+                    MovieItem(movie = movie, onNavigateToDetails = onNavigateToDetails)
+                }
 
-            else -> {
-                LazyColumn(
-                    modifier = Modifier
-                        .padding(padding)
-                        .fillMaxSize(),
-                    contentPadding = PaddingValues(all = spacingProvider.spacing_4),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(space = spacingProvider.spacing_4)
-                ) {
-                    items(
-                        items = uiState.movies,
-                        key = { "${it.id}_${it.title}" }
-                    ) { movie ->
-                        MovieItem(movie = movie, onNavigateToDetails = onNavigateToDetails)
+                if (uiState.isLoading && uiState.movies.isNotEmpty()) {
+                    item {
+                        LoaderIndicator(
+                            modifier = Modifier.padding(vertical = spacingProvider.spacing_4),
+                            color = colorProvider.backgroundColor.bg_strong
+                        )
                     }
                 }
             }

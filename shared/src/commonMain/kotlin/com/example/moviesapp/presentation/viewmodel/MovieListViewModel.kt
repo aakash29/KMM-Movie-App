@@ -25,9 +25,7 @@ class MovieListViewModel(
 
     override fun handleEvent(event: MovieListEvent) {
         viewModelScope.launch {
-            when (event) {
-                is MovieListEvent.LoadMovies -> interactor.processEvent(event)
-            }
+            interactor.processEvent(event)
         }
     }
 }

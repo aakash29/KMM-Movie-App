@@ -28,5 +28,4 @@ fun initKoin(appDeclaration: KoinAppDeclaration = {}) =
 
 fun Koin.getMovieListViewModel(): MovieListViewModel = get()
 fun Koin.getMovieDetailsViewModel(): MovieDetailsViewModel = get()
-
 fun getKoinInstance(): Koin = KoinPlatform.getKoin()

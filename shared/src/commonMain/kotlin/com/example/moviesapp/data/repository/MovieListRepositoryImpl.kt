@@ -13,6 +13,7 @@ import io.ktor.client.call.body
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.get
 import io.ktor.client.request.headers
+import io.ktor.client.request.parameter
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
@@ -24,11 +25,12 @@ class MovieListRepositoryImpl(
     private val httpClient: HttpClient
 ) : MovieListRepository {
 
-    override suspend fun getMovieList(): Result<List<Movie>?> {
+    override suspend fun getMovieList(page: Int): Result<List<Movie>?> {
         return try {
             val response = httpClient.get {
                 headers {
                     endPoint(MOVIE_LIST_PATH)
+                    parameter("page", page)
                 }
                 contentType(ContentType.Application.Json)
             }

@@ -16,21 +16,43 @@ class MovieListInteractor(
     suspend fun processEvent(event: MovieListEvent) {
         when (event) {
             is MovieListEvent.LoadMovies -> loadMovies()
+            is MovieListEvent.LoadNextPage -> loadNextPage()
         }
     }
 
     private suspend fun loadMovies() {
+        if (stateHandler.currentState.isLoading) return
 
+        stateHandler.updateUiState {
+            copy(isLoading = true, movies = emptyList(), currentPage = 1, isEndReached = false)
+        }
+
+        fetchMovies(1)
+    }
+
+    private suspend fun loadNextPage() {
+        val currentState = stateHandler.currentState
+        if (currentState.isLoading || currentState.isEndReached) return
+
+        val nextPage = currentState.currentPage + 1
+        
         stateHandler.updateUiState {
             copy(isLoading = true)
         }
 
-        getMovieListUseCase()
+        fetchMovies(nextPage)
+    }
+
+    private suspend fun fetchMovies(page: Int) {
+        getMovieListUseCase(page = page)
             .onSuccess { result ->
+                val movies = result ?: emptyList()
                 stateHandler.updateUiState {
                     copy(
                         isLoading = false,
-                        movies = result ?: emptyList(),
+                        movies = if (page == 1) movies else this.movies + movies,
+                        currentPage = page,
+                        isEndReached = movies.isEmpty()
                     )
                 }
             }.onError { error ->

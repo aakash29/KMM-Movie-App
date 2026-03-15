@@ -2,6 +2,7 @@
 
 package com.example.moviesapp.screen
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -56,6 +57,11 @@ fun MovieDetailsScreen(
     onNavigationBack: () -> Unit,
     viewModel: MovieDetailsViewModel = koinViewModel()
 ) {
+
+    BackHandler {
+        onNavigationBack()
+    }
+
     val uiState = viewModel.uiState.collectAsState().value
     LaunchedEffect(movieId) {
         viewModel.handleEvent(
