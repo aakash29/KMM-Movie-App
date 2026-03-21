@@ -38,6 +38,7 @@ import androidx.constraintlayout.compose.Dimension
 import coil3.compose.AsyncImage
 import com.example.moviesapp.R
 import com.example.moviesapp.components.CastItem
+import com.example.moviesapp.components.ErrorView
 import com.example.moviesapp.components.LoaderIndicator
 import com.example.moviesapp.domain.model.Cast
 import com.example.moviesapp.domain.model.MovieDetails
@@ -68,10 +69,16 @@ fun MovieDetailsScreen(
             event = MovieDetailsEvent.LoadMovieDetails(movieId = movieId)
         )
     }
+
     MovieDetails(
         uiState = uiState,
         movieName = movieName,
-        onNavigationBack = onNavigationBack
+        onNavigationBack = onNavigationBack,
+        onRetry = {
+            viewModel.handleEvent(
+                event = MovieDetailsEvent.LoadMovieDetails(movieId = movieId)
+            )
+        }
     )
 }
 
@@ -80,6 +87,7 @@ private fun MovieDetails(
     uiState: MovieDetailsUiState,
     movieName: String,
     onNavigationBack: () -> Unit,
+    onRetry: () -> Unit = {},
 ) {
 
     val spacingProvider = LocalSpacingProvider.current
@@ -117,6 +125,13 @@ private fun MovieDetails(
             uiState.isLoading -> {
                 LoaderIndicator(
                     color = colorProvider.backgroundColor.bg_strong
+                )
+            }
+
+            uiState.error.isNullOrEmpty().not() -> {
+                ErrorView(
+                    error = uiState.error ?: "An error occurred while fetching movie details. Please try again.",
+                    onRetry = { onRetry() }
                 )
             }
 

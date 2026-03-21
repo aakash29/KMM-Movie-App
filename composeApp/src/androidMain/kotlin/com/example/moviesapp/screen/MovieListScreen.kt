@@ -34,6 +34,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import coil3.compose.AsyncImage
 import com.example.moviesapp.R
+import com.example.moviesapp.components.ErrorView
 import com.example.moviesapp.components.LoaderIndicator
 import com.example.moviesapp.domain.model.Movie
 import com.example.moviesapp.presentation.events.MovieListEvent
@@ -88,37 +89,46 @@ private fun MovieList(
         }
     ) { padding ->
 
-        if (uiState.isLoading && uiState.movies.isEmpty()) {
-            LoaderIndicator(
-                color = colorProvider.backgroundColor.bg_strong
-            )
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .padding(padding)
-                    .fillMaxSize(),
-                contentPadding = PaddingValues(all = spacingProvider.spacing_4),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(space = spacingProvider.spacing_4)
-            ) {
-                itemsIndexed(
-                    items = uiState.movies,
-                    key = { _, movie -> "${movie.id}_${movie.title}" }
-                ) { index, movie ->
-                    if (index >= uiState.movies.size - 1 && !uiState.isLoading && !uiState.isEndReached) {
-                        LaunchedEffect(Unit) {
-                            onLoadNextPage()
+        when {
+            uiState.isLoading && uiState.movies.isEmpty() -> {
+                LoaderIndicator(
+                    color = colorProvider.backgroundColor.bg_strong
+                )
+            }
+            uiState.error.isNullOrEmpty().not() -> {
+                ErrorView(
+                    error = uiState.error ?: "An error occurred while fetching movies. Please try again.",
+                    onRetry = onLoadNextPage
+                )
+            }
+            else -> {
+                LazyColumn(
+                    modifier = Modifier
+                        .padding(padding)
+                        .fillMaxSize(),
+                    contentPadding = PaddingValues(all = spacingProvider.spacing_4),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(space = spacingProvider.spacing_4)
+                ) {
+                    itemsIndexed(
+                        items = uiState.movies,
+                        key = { _, movie -> "${movie.id}_${movie.title}" }
+                    ) { index, movie ->
+                        if (index >= uiState.movies.size - 1 && !uiState.isLoading && !uiState.isEndReached) {
+                            LaunchedEffect(Unit) {
+                                onLoadNextPage()
+                            }
                         }
+                        MovieItem(movie = movie, onNavigateToDetails = onNavigateToDetails)
                     }
-                    MovieItem(movie = movie, onNavigateToDetails = onNavigateToDetails)
-                }
 
-                if (uiState.isLoading && uiState.movies.isNotEmpty()) {
-                    item {
-                        LoaderIndicator(
-                            modifier = Modifier.padding(vertical = spacingProvider.spacing_4),
-                            color = colorProvider.backgroundColor.bg_strong
-                        )
+                    if (uiState.isLoading && uiState.movies.isNotEmpty()) {
+                        item {
+                            LoaderIndicator(
+                                modifier = Modifier.padding(vertical = spacingProvider.spacing_4),
+                                color = colorProvider.backgroundColor.bg_strong
+                            )
+                        }
                     }
                 }
             }
