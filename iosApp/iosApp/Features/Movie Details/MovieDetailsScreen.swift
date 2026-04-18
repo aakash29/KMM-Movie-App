@@ -138,20 +138,18 @@ struct MovieDetailsScreen: View {
                         .multilineTextAlignment(.center)
                         .foregroundStyle(.secondary)
                     Button(String(localized: "common.retry")) {
-                        viewModel.onEvent(MovieDetailsEvent.LoadMovieDetails(movieId: movie.id))
+                        viewModel.reloadMovieDetails(movieId: movie.id)
                     }
                     .buttonStyle(.borderedProminent)
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 24)
-                
-                //Text(error).foregroundColor(.red)
             }
         }
         .navigationTitle(movie.title)
         .navigationBarTitleDisplayMode(.inline)
-        .onAppear {
-            viewModel.onEvent(MovieDetailsEvent.LoadMovieDetails(movieId: movie.id))
+        .task(id: movie.id) {
+            viewModel.loadMovieDetailsIfNeeded(movieId: movie.id)
         }
     }
 }

@@ -24,7 +24,7 @@ struct MovieListScreen: View {
                             .multilineTextAlignment(.center)
                             .foregroundStyle(.secondary)
                         Button(String(localized: "common.retry")) {
-                            viewModel.onEvent(MovieListEvent.LoadMovies())
+                            viewModel.reloadMovies()
                         }
                         .buttonStyle(.borderedProminent)
                     }
@@ -52,12 +52,8 @@ struct MovieListScreen: View {
                                 .onTapGesture {
                                     navigationPath.append(movie)
                                 }
-                                .onAppear {
-                                    if movie.id == viewModel.movieUiState.movies.last?.id {
-                                        if !viewModel.movieUiState.isLoading && !viewModel.movieUiState.isEndReached {
-                                            viewModel.onEvent(MovieListEvent.LoadNextPage())
-                                        }
-                                    }
+                                .task(id: movie.id) {
+                                    viewModel.loadNextPageIfNeeded(currentMovieId: movie.id)
                                 }
                         }
                         
@@ -78,10 +74,8 @@ struct MovieListScreen: View {
             .navigationDestination(for: Movie_.self) { movie in
                 MovieDetailsScreen(movie: movie)
             }
-            .onAppear {
-                if viewModel.movieUiState.movies.isEmpty {
-                    viewModel.onEvent(MovieListEvent.LoadMovies())
-                }
+            .task {
+                viewModel.loadMoviesIfNeeded()
             }
         }
     }

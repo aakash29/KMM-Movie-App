@@ -10,6 +10,7 @@ class MovieDetailsViewModelWrapper: ObservableObject {
 
     let movieDetailsViewModel: MovieDetailsViewModel
     @Published var movieDetailsUiState: MovieDetailsUiState
+    private var loadedMovieId: Int32?
 
     init() {
         let koin = KoinKt.getKoinInstance()
@@ -26,5 +27,16 @@ class MovieDetailsViewModelWrapper: ObservableObject {
 
     func onEvent(_ event: MovieDetailsEvent) {
         movieDetailsViewModel.handleEvent(event: event)
+    }
+
+    func loadMovieDetailsIfNeeded(movieId: Int32) {
+        guard loadedMovieId != movieId else { return }
+        loadedMovieId = movieId
+        onEvent(MovieDetailsEvent.LoadMovieDetails(movieId: movieId))
+    }
+
+    func reloadMovieDetails(movieId: Int32) {
+        loadedMovieId = movieId
+        onEvent(MovieDetailsEvent.LoadMovieDetails(movieId: movieId))
     }
 }
